@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AbodeX — Smart Hostel Room Allocation System</title>
+    <style>
+        :root {
+            --bg-dark: #0d0f12;
+            --card-dark: #161b22;
+            --border-dark: #30363d;
+            --border-active: #58a6ff;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #1f6feb;
+            --accent-cyan: #38bdf8;
+            
+            /* Room status pastel colors matching reference */
+            --avail-bg: #d4f7df;
+            --avail-text: #14532d;
+            --avail-sub: #166534;
+
+            --partial-bg: #fef9c3;
+            --partial-text: #713f12;
+            --partial-sub: #854d0e;
+
+            --full-bg: #fee2e2;
+            --full-text: #9f1239;
+            --full-sub: #be185d;
+
+            --cot-avail: #3fb950;
+            --cot-occ: #f85149;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Top Nav */
+        header {
+            background-color: var(--card-dark);
+            border-bottom: 1px solid var(--border-dark);
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            letter-spacing: -0.5px;
+        }
+
+        .block-pill {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 600;
+            padding-left: 12px;
+            border-left: 2px solid var(--border-dark);
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .student-badge {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .student-badge span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .my-booking-pill {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--cot-avail);
+            font-weight: 600;
+            border: 1px solid rgba(63, 185, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background: #21262d;
+            border: 1px solid var(--border-dark);
+            color: var(--text-primary);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 24px 32px 48px;
+        }
+
+        /* Banner matching Image 2 */
+        .overview-banner {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 14px;
+            padding: 26px 28px;
+            margin-bottom: 24px;
+        }
+
+        .banner-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .banner-icon {
+            width: 52px;
+            height: 52px;
+            background: #e0f2fe;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-icon svg {
+            width: 32px;
+            height: 32px;
+            stroke: #0284c7;
+        }
+
+        .banner-title h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .banner-title h2 {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .banner-title p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 16px 0;
+            border-top: 1px solid rgba(48, 54, 61, 0.6);
+            border-bottom: 1px solid rgba(48, 54, 61, 0.6);
+            margin-bottom: 14px;
+        }
+
+        .stat-item .label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .stat-item .value {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        .banner-foot {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Floor Navigation */
+        .floor-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .floor-btn {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            color: var(--text-secondary);
+            padding: 9px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .floor-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+
+        .floor-btn.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: #fff;
+        }
+
+        /* Section Header & Legend matching Image 1 */
+        .section-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-avail { background: var(--avail-bg); }
+        .dot-full { background: var(--full-bg); }
+        .dot-partial { background: var(--partial-bg); }
+
+        /* 40 Room Grid matching Image 1 */
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .room-card {
+            border-radius: 12px;
+            padding: 16px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            border: 2px solid transparent;
+        }
+
+        .room-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border-color: var(--border-active);
+        }
+
+        .room-card.state-avail {
+            background: var(--avail-bg);
+            color: var(--avail-text);
+        }
+        .room-card.state-avail .room-sub {
+            color: var(--avail-sub);
+        }
+
+        .room-card.state-partial {
+            background: var(--partial-bg);
+            color: var(--partial-text);
+        }
+        .room-card.state-partial .room-sub {
+            color: var(--partial-sub);
+        }
+
+        .room-card.state-full {
+            background: var(--full-bg);
+            color: var(--full-text);
+        }
+        .room-card.state-full .room-sub {
+            color: var(--full-sub);
+        }
+
+        .room-number {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .room-sub {
+            font-size: 12px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Modal dialog matching Image 3 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 16px;
+            width: 740px;
+            max-width: 95%;
+            padding: 28px 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-header p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            margin-bottom: 22px;
+        }
+
+        /* 2x2 Cot Cards Grid */
+        .cots-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .cot-card {
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .cot-card:hover {
+            border-color: var(--border-active);
+        }
+
+        .cot-icon {
+            margin-bottom: 12px;
+        }
+
+        .cot-card.avail .cot-icon svg {
+            stroke: var(--cot-avail);
+        }
+        .cot-card.occ .cot-icon svg {
+            stroke: var(--cot-occ);
+        }
+
+        .cot-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .cot-status {
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .cot-card.avail .cot-status { color: var(--cot-avail); }
+        .cot-card.occ .cot-status { color: var(--cot-occ); }
+
+        .cot-occupant {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid var(--border-dark);
+            padding-top: 18px;
+        }
+
+        /* Form elements for student switch */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%;
+            background: var(--card-dark);
+            border: 1px solid var(--border-dark);
+            color: var(--text-primary);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: var(--accent-blue);
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <header>
+        <div class="brand-container">
+            <div class="brand-logo">AbodeX</div>
+            <div class="block-pill" id="headerBlockName">Kurinji Block (Boys)</div>
+        </div>
+        <div class="user-nav">
+            <div class="student-badge">Student: <span id="currentStudentDisplay">Arun Kumar (2023103001)</span></div>
+            <div id="bookingBadgeContainer">
+                <span class="my-booking-pill" id="myBookingPill">Loading status...</span>
+            </div>
+            <button class="btn-secondary" onclick="openStudentModal()">Switch Student / Block</button>
+            <a href="/swagger-ui/index.html" target="_blank" class="btn-secondary" style="text-decoration:none;">API Docs</a>
+        </div>
+    </header>
+
+    <!-- Main View -->
+    <main>
+        <!-- Hero Overview Banner matching Image 2 -->
+        <section class="overview-banner">
+            <div class="banner-header">
+                <div class="banner-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                        <line x1="9" y1="22" x2="9" y2="22.01"></line>
+                        <line x1="15" y1="22" x2="15" y2="22.01"></line>
+                        <line x1="8" y1="6" x2="10" y2="6"></line>
+                        <line x1="14" y1="6" x2="16" y2="6"></line>
+                        <line x1="8" y1="10" x2="10" y2="10"></line>
+                        <line x1="14" y1="10" x2="16" y2="10"></line>
+                        <line x1="8" y1="14" x2="10" y2="14"></line>
+                        <line x1="14" y1="14" x2="16" y2="14"></line>
+                    </svg>
+                </div>
+                <div class="banner-title">
+                    <h1>AbodeX</h1>
+                    <h2>Smart Hostel Room Allocation System</h2>
+                    <p>A visual, cot-level booking application designed around your hostel's room structure.</p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="label">Floors per block</div>
+                    <div class="value">4</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Rooms per floor</div>
+                    <div class="value">40</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Total rooms</div>
+                    <div class="value">160</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">Cots per room</div>
+                    <div class="value">4</div>
+                </div>
+            </div>
+
+            <div class="banner-foot">
+                Based on your proposed model: one assigned hostel block per student, with 640 individual cot positions in that block.
+            </div>
+        </section>
+
+        <!-- Floor Switcher Tabs -->
+        <div class="floor-tabs">
+            <button class="floor-btn active" onclick="switchFloor(0, this)">Ground Floor (001 - 040)</button>
+            <button class="floor-btn" onclick="switchFloor(1, this)">First Floor (101 - 140)</button>
+            <button class="floor-btn" onclick="switchFloor(2, this)">Second Floor (201 - 240)</button>
+            <button class="floor-btn" onclick="switchFloor(3, this)">Third Floor (301 - 340)</button>
+        </div>
+
+        <!-- Section Header & Color Legend matching Image 1 -->
+        <div class="section-header-bar">
+            <div class="section-title" id="sectionFloorTitle">Room Availability — Ground Floor</div>
+            <div class="legend">
+                <div class="legend-item"><span class="legend-dot dot-avail"></span> Available</div>
+                <div class="legend-item"><span class="legend-dot dot-full"></span> Fully occupied</div>
+                <div class="legend-item"><span class="legend-dot dot-partial"></span> Partially occupied</div>
+            </div>
+        </div>
+
+        <!-- 40 Room Grid matching Image 1 -->
+        <div class="room-grid" id="roomGrid">
+            <!-- Dynamically populated via REST API -->
+        </div>
+    </main>
+
+    <!-- Cot Details Modal matching Image 3 -->
+    <div class="modal-overlay" id="cotModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="modalRoomTitle">Room 014 — Cot Details</h2>
+                <p>Each room has two bunk beds with an upper and lower cot on each.</p>
+            </div>
+
+            <div class="cots-grid" id="modalCotsGrid">
+                <!-- Dynamically populated -->
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeCotModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Switch Modal -->
+    <div class="modal-overlay" id="studentModal">
+        <div class="modal-card" style="width: 500px;">
+            <div class="modal-header">
+                <h2>Student Profile Authentication</h2>
+                <p>Enter details to switch student session or assigned hostel block.</p>
+            </div>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="inputStudentName" class="form-control" value="Arun Kumar">
+            </div>
+            <div class="form-group">
+                <label>Register Number</label>
+                <input type="text" id="inputStudentRegNo" class="form-control" value="2023103001">
+            </div>
+            <div class="form-group">
+                <label>Department</label>
+                <select id="inputStudentDept" class="form-control">
+                    <option>Computer Science and Engineering</option>
+                    <option>Information Technology</option>
+                    <option>Electronics & Communication</option>
+                    <option>Mechanical Engineering</option>
+                    <option>Civil Engineering</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Management Allocated Block</label>
+                <select id="inputBlockSelect" class="form-control">
+                    <option value="Kurinji Block (Boys)">Kurinji Block (Boys)</option>
+                    <option value="Mullai Block (Boys)">Mullai Block (Boys)</option>
+                    <option value="Ganga Block (Girls)">Ganga Block (Girls)</option>
+                </select>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeStudentModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveStudentProfile()">Apply & Refresh</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStudent = {
+            name: "Arun Kumar",
+            regNo: "2023103001",
+            dept: "Computer Science and Engineering",
+            gender: "Boys",
+            block: "Kurinji Block (Boys)"
+        };
+        let currentFloor = 0;
+        let activeRoom = null;
+
+        const floorNames = ["Ground Floor", "First Floor", "Second Floor", "Third Floor"];
+
+        // Vector Bed SVG Helper
+        function getBedSvg(color) {
+            return `
+                <svg width="28" height="24" viewBox="0 0 28 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="2" y1="6" x2="2" y2="20"></line>
+                    <line x1="26" y1="10" x2="26" y2="20"></line>
+                    <line x1="2" y1="15" x2="26" y2="15"></line>
+                    <rect x="5" y="10" width="6" height="5" rx="2"></rect>
+                    <rect x="12" y="12" width="12" height="3" rx="1"></rect>
+                </svg>
+            `;
+        }
+
+        async function init() {
+            updateUserDisplay();
+            await checkStudentBooking();
+            await loadFloorRooms();
+        }
+
+        function updateUserDisplay() {
+            document.getElementById("currentStudentDisplay").innerText = `${currentStudent.name} (${currentStudent.regNo})`;
+            document.getElementById("headerBlockName").innerText = currentStudent.block;
+        }
+
+        async function checkStudentBooking() {
+            try {
+                const res = await fetch(`/api/bookings/${currentStudent.regNo}`);
+                const badge = document.getElementById("myBookingPill");
+                if (res.ok) {
+                    const data = await res.json();
+                    badge.innerText = `Booked: Room ${data.roomNumber} (${data.cotCode})`;
+                    badge.style.display = "inline-block";
+                } else {
+                    badge.innerText = "[No Cot Booked]";
+                    badge.style.color = "var(--text-muted)";
+                    badge.style.background = "transparent";
+                    badge.style.borderColor = "var(--border-dark)";
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadFloorRooms() {
+            document.getElementById("sectionFloorTitle").innerText = `Room Availability — ${floorNames[currentFloor]}`;
+            const grid = document.getElementById("roomGrid");
+            grid.innerHTML = "<p style='color:var(--text-secondary); grid-column:span 4;'>Loading rooms...</p>";
+
+            try {
+                const res = await fetch(`/api/blocks/${encodeURIComponent(currentStudent.block)}/floors/${currentFloor}`);
+                if (!res.ok) throw new Error("Failed to fetch rooms");
+                const rooms = await res.json();
+
+                grid.innerHTML = "";
+                rooms.forEach(room => {
+                    const card = document.createElement("div");
+                    let stateClass = "state-avail";
+                    if (room.occupancyState === "FULLY_OCCUPIED") stateClass = "state-full";
+                    else if (room.occupancyState === "PARTIALLY_OCCUPIED") stateClass = "state-partial";
+
+                    card.className = `room-card ${stateClass}`;
+                    card.innerHTML = `
+                        <div class="room-number">${room.roomNumber}</div>
+                        <div class="room-sub">${room.statusText}</div>
+                    `;
+                    card.onclick = () => openCotModal(room.roomNumber);
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                grid.innerHTML = `<p style='color:#f85149; grid-column:span 4;'>Error loading rooms: ${err.message}</p>`;
+            }
+        }
+
+        function switchFloor(floorIdx, btn) {
+            currentFloor = floorIdx;
+            document.querySelectorAll(".floor-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            loadFloorRooms();
+        }
+
+        async function openCotModal(roomNumber) {
+            activeRoom = roomNumber;
+            document.getElementById("modalRoomTitle").innerText = `Room ${roomNumber} — Cot Details`;
+            const cotsContainer = document.getElementById("modalCotsGrid");
+            cotsContainer.innerHTML = "<p style='color:var(--text-secondary);'>Loading cot information...</p>";
+
+            document.getElementById("cotModal").classList.add("active");
+
+            try {
+                const res = await fetch(`/api/blocks/${encodeURIComponent(currentStudent.block)}/rooms/${roomNumber}`);
+                if (!res.ok) throw new Error("Could not fetch cot data");
+                const roomData = await res.json();
+
+                cotsContainer.innerHTML = "";
+                roomData.cots.forEach(cot => {
+                    const isOcc = cot.occupied;
+                    const cotCard = document.createElement("div");
+                    cotCard.className = `cot-card ${isOcc ? "occ" : "avail"}`;
+                    const color = isOcc ? "#f85149" : "#3fb950";
+
+                    let occText = isOcc ? `Example occupant: ${cot.occupantName || "Student"}` : "Available for booking";
+                    cotCard.innerHTML = `
+                        <div class="cot-icon">${getBedSvg(color)}</div>
+                        <div class="cot-title">${cot.label}</div>
+                        <div class="cot-status">${isOcc ? "Occupied" : "Available"}</div>
+                        <div class="cot-occupant">${occText}</div>
+                    `;
+
+                    cotCard.onclick = () => handleCotClick(cot, roomNumber);
+                    cotsContainer.appendChild(cotCard);
+                });
+            } catch (e) {
+                cotsContainer.innerHTML = `<p style='color:#f85149'>Error: ${e.message}</p>`;
+            }
+        }
+
+        function closeCotModal() {
+            document.getElementById("cotModal").classList.remove("active");
+        }
+
+        async function handleCotClick(cot, roomNumber) {
+            if (cot.occupied) {
+                if (cot.occupantRegNo === currentStudent.regNo) {
+                    if (confirm(`You currently occupy ${cot.label} in Room ${roomNumber}.\nDo you want to VACATE / CANCEL your booking?`)) {
+                        const delRes = await fetch(`/api/bookings/${currentStudent.regNo}`, { method: "DELETE" });
+                        if (delRes.status === 204) {
+                            alert("Booking cancelled successfully.");
+                            closeCotModal();
+                            checkStudentBooking();
+                            loadFloorRooms();
+                        }
+                    }
+                } else {
+                    alert(`This cot (${cot.label}) is already occupied by ${cot.occupantName} (${cot.occupantRegNo} - ${cot.occupantDepartment || "Dept"}).`);
+                }
+                return;
+            }
+
+            // Prompt booking confirmation
+            const confirmMsg = `Confirm Cot Allocation:\n\nHostel: ${currentStudent.block}\nRoom:   ${roomNumber}\nCot:    ${cot.label}\nStudent: ${currentStudent.name} (${currentStudent.regNo})\n\nProceed with booking?`;
+            if (confirm(confirmMsg)) {
+                const payload = {
+                    registerNumber: currentStudent.regNo,
+                    name: currentStudent.name,
+                    department: currentStudent.dept,
+                    gender: currentStudent.gender,
+                    blockName: currentStudent.block,
+                    roomNumber: roomNumber,
+                    cotCode: cot.cotCode
+                };
+
+                const res = await fetch("/api/bookings", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.status === 201) {
+                    alert(`Congratulations ${currentStudent.name}! Cot ${cot.label} in Room ${roomNumber} is confirmed.`);
+                    closeCotModal();
+                    checkStudentBooking();
+                    loadFloorRooms();
+                } else {
+                    const err = await res.json();
+                    alert(`Booking Error: ${err.message || "Failed to book"}`);
+                }
+            }
+        }
+
+        function openStudentModal() {
+            document.getElementById("studentModal").classList.add("active");
+        }
+        function closeStudentModal() {
+            document.getElementById("studentModal").classList.remove("active");
+        }
+        function saveStudentProfile() {
+            currentStudent.name = document.getElementById("inputStudentName").value.trim();
+            currentStudent.regNo = document.getElementById("inputStudentRegNo").value.trim();
+            currentStudent.dept = document.getElementById("inputStudentDept").value;
+            currentStudent.block = document.getElementById("inputBlockSelect").value;
+            closeStudentModal();
+            updateUserDisplay();
+            checkStudentBooking();
+            loadFloorRooms();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+{
+  "info": {
+    "name": "AbodeX - Smart Hostel Room Allocation API",
+    "_postman_id": "abodex-api-collection",
+    "description": "Postman test collection for AbodeX Anna University hostel booking endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. GET All Hostel Blocks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/blocks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "blocks"]
+        }
+      }
+    },
+    {
+      "name": "2. GET Floor 0 Rooms (Ground Floor)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/blocks/Kurinji Block (Boys)/floors/0",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "blocks", "Kurinji Block (Boys)", "floors", "0"]
+        }
+      }
+    },
+    {
+      "name": "3. GET Room 014 Cot Details",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/blocks/Kurinji Block (Boys)/rooms/014",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "blocks", "Kurinji Block (Boys)", "rooms", "014"]
+        }
+      }
+    },
+    {
+      "name": "4. CREATE: Book Cot (Bunk 1 Upper in Room 014)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"registerNumber\": \"2023103001\",\n  \"name\": \"Arun Kumar\",\n  \"department\": \"Computer Science and Engineering\",\n  \"gender\": \"Boys\",\n  \"blockName\": \"Kurinji Block (Boys)\",\n  \"roomNumber\": \"014\",\n  \"cotCode\": \"B1_U\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/bookings",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "bookings"]
+        }
+      }
+    },
+    {
+      "name": "5. READ: Get Student Allotment",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/bookings/2023103001",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "bookings", "2023103001"]
+        }
+      }
+    },
+    {
+      "name": "6. UPDATE: Switch Cot to Room 015",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"registerNumber\": \"2023103001\",\n  \"name\": \"Arun Kumar\",\n  \"department\": \"Computer Science and Engineering\",\n  \"gender\": \"Boys\",\n  \"blockName\": \"Kurinji Block (Boys)\",\n  \"roomNumber\": \"015\",\n  \"cotCode\": \"B2_L\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/bookings/2023103001",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "bookings", "2023103001"]
+        }
+      }
+    },
+    {
+      "name": "7. DELETE: Vacate Allotted Cot",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/bookings/2023103001",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "bookings", "2023103001"]
+        }
+      }
+    }
+  ]
+}
